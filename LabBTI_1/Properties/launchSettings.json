@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LabBTI_1": {
+      "commandName": "Project",
+      "commandLineArgs": "decrypt 1 cbobob"
+    }
+  }
+}
