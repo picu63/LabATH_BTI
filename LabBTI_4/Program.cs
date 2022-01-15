@@ -1,32 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace LabBTI_4
 {
     internal class Program
     {
-        public static char[][] tableChars = new char[5][];
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            var input = "Testowy";
-            if (input.Any(c => !char.IsLetter(c)))
-            {
-                throw new Exception("Input characters must be letters");
-            }
-            var inputFormatted = new string(input.ToUpper().Replace('J','I').Distinct().ToArray());
-            Console.WriteLine($"Your key is: {inputFormatted}");
-            var alphabetFormatted = new string(Enumerable.Range(65, 26).Select(i=>(char)i).Where(c => !c.Equals('J')).ToArray());
-            foreach (var letter in alphabetFormatted)
-            {
-                Console.Write(letter + "; ");
-            }
-
-            for (var index = 0; index < inputFormatted.Length; index++)
-            {
-                var letter = inputFormatted[index];
-                var alphLetterIndex = alphabetFormatted[index];
-                alphabetFormatted.Replace(alphLetterIndex, letter);
-            }
+            var toEncrypt = "To jest wiadomosc do zaszyfrowania";
+            var key = "Tesowa";
+            Console.WriteLine($"Wiadomość do zaszyfrowania: {toEncrypt}");
+            var encrypted = PlayfairCipher.Encipher(toEncrypt, key);
+            Console.WriteLine("Zaszyfrowana wiadomość: " + encrypted);
+            var decrypted = PlayfairCipher.Decipher(encrypted, key);
+            Console.WriteLine($"Odszyfrowana wiadomość: {decrypted}");
         }
     }
 }
