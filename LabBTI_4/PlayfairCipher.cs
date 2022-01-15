@@ -96,7 +96,7 @@ namespace LabBTI_4
 			for (var i = 0; i < input.Length; ++i)
 			{
 				if (!char.IsLetter(input[i]))
-					retVal = retVal.Insert(i, input[i].ToString());
+					retVal = retVal.Insert(i, input[i]);
 
 				if (char.IsLower(input[i]))
 					retVal[i] = char.ToLower(retVal[i]);
