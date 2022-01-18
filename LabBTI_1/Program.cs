@@ -15,6 +15,8 @@ namespace LabBTI_1
                                   "2) Integer key\n" +
                                   "3) Text to encrypt");
             }
+            if(args.Length != 3)
+                return;
             var encryptionMethod = args[0];
             var keyExist = int.TryParse(args[1], out int key);
             if (!keyExist)
