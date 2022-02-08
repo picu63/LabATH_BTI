@@ -1,43 +1,128 @@
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 
-public static class AffineCipher
+namespace LabBTI_3;
+
+internal static class AffineCipher
 {
-    private const int Alphabet = 26;
-    private const int ChunkSize = 5;
-    public static string Encrypt(string plainText, int a, int b)
+    private static readonly char[] CharCollection =
+        Enumerable.Range('A', 26)
+            .Concat(Enumerable.Range('a', 26)) // dodanie całego alfabetu
+            .Concat(Enumerable.Range(' ', 1)) // dodanie spacji
+            .Concat((new int[] { '?', '!', '.', ':', '-', '_', '(', ')' })) // dodanie znaków interpunkcyjnych
+            .Select(x => (char)x)
+            .ToArray();
+
+    // szyfrowanie
+    public static string Cipher(string textToEncrypt, int a, int b)
     {
-        if(!IsCoprime(a, Alphabet)) 
-            throw new ArgumentException("Numbers must be coprime");
-        var encoded = plainText.ToLower().Where(char.IsLetterOrDigit)
-                               .Select(x => char.IsDigit(x) ? x : ToChar((a * Index(x) + b) % Alphabet));
-        return string.Join(" ", encoded.Chunk(ChunkSize).Select(x => new string(x.ToArray())));
-    }
-    private static IEnumerable<IEnumerable<char>> Chunk(this IEnumerable<char> source, int size)
-    {
-        while(source.Any())
+        if (!AssertAB(a, b)) return textToEncrypt;
+
+        var result = string.Empty;
+
+        var m = CharCollection.Length;
+
+        var result1 = result;
+        foreach (var pChar in textToEncrypt)
         {
-           yield return source.Take(size);
-            source = source.Skip(size);
+            var p = Array.IndexOf(CharCollection, pChar);
+            var c = a * p + b % m;
+            var cIdx = c % CharCollection.Length;
+            var c1 = CharCollection[cIdx];
+            result1 += c1;
+        }
+
+        return result1;
+    }
+
+    // Deszyfrowanie
+    public static string Decipher(string textToDecrypt, int a, int b)
+    {
+        if (!AssertAB(a, b)) return textToDecrypt;
+
+        var result = string.Empty;
+
+        foreach (var cChar in textToDecrypt)
+        {
+            var c = Array.IndexOf(CharCollection, cChar);
+
+            var aInverse = GetMultiplicativeInverse(a);
+            var pIdx = aInverse * (c - b) % CharCollection.Length;
+            if (pIdx < 0)
+            {
+                pIdx += CharCollection.Length;
+            }
+            var pChar = CharCollection[pIdx];
+
+            result += pChar;
+        }
+
+        return result;
+    }
+
+    // Zwraca największy wspólny dzielnik
+    private static int GreatestCommonDivisor(int a, int b)
+    {
+        while (true)
+        {
+            if (b == 0) return a;
+            var a1 = a;
+            a = b;
+            b = a1 % b;
         }
     }
-    public static string Decrypt(string cipheredText, int a, int b)
+
+    // Sprawdza czy są liczbami pierwszymi
+    private static bool AreRelativelyPrimes(int m, int n)
     {
-        if(!IsCoprime(a, Alphabet))
-            throw new ArgumentException("Numbers must be coprime");
-        return new string(cipheredText.Where(char.IsLetterOrDigit)
-                                      .Select(x => char.IsDigit(x) ? x : DecodeSymbol(x, a, b))
-                                      .ToArray());
+        return GreatestCommonDivisor(m, n) == 1;
     }
-    private static char DecodeSymbol(char c, int a, int b) 
+
+    // walidacja wartości kluczy
+    private static bool AssertAB(int a, int b)
     {
-        var value = Mmi(a) * (Index(c) - b) % Alphabet;
-        if(value < 0) value += Alphabet;
-        return ToChar(value);
+        var result = false;
+
+        var message = string.Empty;
+
+        // Parametry a oraz b muszą być pomiędzy 1 <= a <= CharCollection.Length
+        if (a < 1 || a > CharCollection.Length)
+        {
+            message = $"'a' musi być pomiędzy [1,{CharCollection.Length}]";
+        }
+
+        else if (b < 1 || b > CharCollection.Length)
+        {
+            message = $"'b' musi być pomiędzy [1,{CharCollection.Length}]";
+        }
+
+        else if (!AreRelativelyPrimes(a, CharCollection.Length))
+        {
+            message = $"'a' musi być liczbą pierwszą do {CharCollection.Length}";
+        }
+        else
+        {
+            result = true;
+        }
+
+        Console.WriteLine(message);
+
+        return result;
     }
-    private static int Mmi(int a) => Enumerable.Range(1, Alphabet).First(x => (a * x % Alphabet) == 1);
-    private static int Index(char c) => c - 'a';
-    private static char ToChar(int i) => (char)('a' + i);
-    private static bool IsCoprime(int a, int m) => a == 0 ? m == 1 : IsCoprime(m % a, a);
+
+    // odwracanie multiplikatywne
+    private static int GetMultiplicativeInverse(int a)
+    {
+        var result = 1;
+
+        for (var i = 1; i <= CharCollection.Length; i++)
+        {
+            if ((a * i) % (CharCollection.Length) == 1)
+            {
+                result = i;
+            }
+        }
+
+        return result;
+    }
 }
