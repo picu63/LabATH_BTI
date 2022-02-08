@@ -15,7 +15,7 @@ public static class VignereCipher
         return VignereCipher.Cipher(textToDecrypt, password, false);
     }
 
-    public static string Cipher(string input, string password, bool encrypt)
+    private static string Cipher(string input, string password, bool encrypt)
     {
         if (password.Any(t => !char.IsLetter(t)))
         {
